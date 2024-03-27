@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/.env bash
 
 UNAMEOUT="$(uname -s)"
 
@@ -117,7 +117,7 @@ else
     display_help
 fi
 
-# Source the ".env" file so Laravel's environment variables are available...
+# Source the "..env" file so Laravel's environment variables are available...
 if [ ! -z "$APP_ENV" ] && [ -f ./.env.$APP_ENV ]; then
   source ./.env.$APP_ENV;
 elif [ -f ./.env ]; then

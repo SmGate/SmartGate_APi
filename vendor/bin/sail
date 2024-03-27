@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/.env sh
 
 # Support bash to support `source` with fallback on $0 if this does not run with bash
 # https://stackoverflow.com/a/35006505/6512

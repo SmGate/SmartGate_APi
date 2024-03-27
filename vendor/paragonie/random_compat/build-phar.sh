@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/.env bash
 
 basedir=$( dirname $( readlink -f ${BASH_SOURCE[0]} ) )
 
