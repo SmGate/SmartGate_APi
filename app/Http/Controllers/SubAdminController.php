@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Subadmin;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Vistordetail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
@@ -35,14 +36,15 @@ class SubAdminController extends Controller
                 "success" => false
 
             ], 403);
-        }  $user = new User;
+        }
+        $user = new User;
         $image = $request->file('image');
 
-          if($image!=null)
-        {
-        $imageName= time().".".$image->extension();
-        $image->move(public_path('/storage/'), $imageName);
-        $user->image=$imageName;}
+        if ($image != null) {
+            $imageName = time() . "." . $image->extension();
+            $image->move(public_path('/storage/'), $imageName);
+            $user->image = $imageName;
+        }
 
 
 
@@ -55,7 +57,7 @@ class SubAdminController extends Controller
         $user->roleid = $request->roleid;
         $user->rolename = $request->rolename;
         $user->password = Hash::make($request->password);
-        $user->image = $imageName??'images/user.png';
+        $user->image = $imageName ?? 'images/user.png';
         $user->save();
         $tk =   $user->createToken('token')->plainTextToken;
         $subadmin = new Subadmin;
@@ -75,6 +77,28 @@ class SubAdminController extends Controller
         );
     }
 
+
+    //////  getting visitor details 
+
+
+    public function getVisitorsDetails($subadminid)
+    {
+
+        $residents = Vistordetail::where('subadminid', $subadminid)->get();
+
+
+        return response()->json([
+            "success" => true,
+            "data" => $residents,
+            "message" => "Residents data retrieved successfully"
+        ]);
+    }
+
+    //getVisitorsDetailsBySubadmin
+
+
+    //////////
+
     public function deletesubadmin($id)
 
     {
@@ -88,6 +112,9 @@ class SubAdminController extends Controller
             "message" => "Sub Admin Deleted successfully"
         ]);
     }
+
+
+    ////////////////////////
 
 
     public  function updatesubadmin(Request $request)
@@ -124,15 +151,13 @@ class SubAdminController extends Controller
 
         if ($request->hasFile('image')) {
             $destination = public_path('storage\\') . $user->image;
-        // dd($destination);
+            // dd($destination);
 
 
 
             if (File::exists(public_path('storage\\') . 'images/user.png')) {
                 print("delete");
-
-            }
-          else  if (File::exists($destination)) {
+            } else  if (File::exists($destination)) {
                 print("delete");
                 unlink($destination);
             }
@@ -163,12 +188,12 @@ class SubAdminController extends Controller
 
     {
 
-       
+
 
         $data = Subadmin::where('societyid', $id)->join('users', 'users.id', '=', 'subadmins.subadminid')->get();
 
 
-    
+
 
         return response()->json(
             [
@@ -180,9 +205,4 @@ class SubAdminController extends Controller
 
         );
     }
-
-
-
-
-    
 }

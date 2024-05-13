@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class FloorController extends Controller
 {
-    
+
 
 
     public function addfloors(Request $request)
@@ -65,7 +65,7 @@ class FloorController extends Controller
 
 
 
-   
+
 
     public function viewfloorsforresidents($buildingid)
     {
@@ -74,20 +74,15 @@ class FloorController extends Controller
         return response()->json(["data" => $floors]);
     }
 
-public function floors($subadminid)
+    public function floors($subadminid)
     {
 
-       
+
         $floors =  Floor::where('subadminid', $subadminid)->get();
-
-
-
-
 
         return response()->json([
             "success" => true,
             "data" => $floors,
         ]);
     }
-
 }

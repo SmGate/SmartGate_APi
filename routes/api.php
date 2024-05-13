@@ -61,11 +61,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('viewsubadmin/{id}', [SubAdminController::class, 'viewsubadmin']);
   Route::get('deletesubadmin/{id}', [SubAdminController::class, 'deletesubadmin']);
   Route::post('updatesubadmin', [SubAdminController::class, 'updatesubadmin']);
+  Route::get('getVisitors/{subadminid}', [SubAdminController::class, 'getVisitorsDetails']);
   // Residents
   Route::post('registerresident', [ResidentController::class, 'registerresident']);
-  Route::post('updateusername', [ResidentController::class, 'updateUserName']); 
-  Route::post('updatechatvisibility', [ResidentController::class, 'updateChatVisibility']); 
-  Route::post('checkchatvisibility', [ResidentController::class, 'checkChatVisibility']); 
+  Route::post('updateusername', [ResidentController::class, 'updateUserName']);
+  Route::post('updatechatvisibility', [ResidentController::class, 'updateChatVisibility']);
+  Route::post('checkchatvisibility', [ResidentController::class, 'checkChatVisibility']);
   Route::get('viewresidents/{id}', [ResidentController::class, 'viewresidents']);
   Route::get('deleteresident/{id}', [ResidentController::class, 'deleteresident']);
   Route::get('searchresident/{subadminid}/{q?}', [ResidentController::class, 'searchresident']);
@@ -80,6 +81,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('verifyapartmentresident', [ResidentController::class, 'verifyapartmentresident']);
   Route::get('filterResident/{subadminid}/{type}', [ResidentController::class, 'filterResident']);
   Route::get('unverifiedresidentcount/{subadminid}', [ResidentController::class, 'unverifiedresidentcount']);
+  Route::get('residents', [ResidentController::class, 'getAllResidentsAA']);
+
 
   // GateKeeper
   Route::post('registergatekeeper', [GateKeeperController::class, 'registergatekeeper']);
@@ -222,6 +225,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('generatedsocietyapartmentbill/{subadminid}', [BillController::class, 'generatedsocietyapartmentbill']);
   Route::get('monthlybills/{residenid}', [BillController::class, 'monthlybills']);
   Route::post('paybill', [BillController::class, 'paybill']);
+  Route::post('updatebill', [BillController::class, 'updatehousebill']);
+  Route::post('generateSoloBill', [BillController::class, 'generateSoloBill']);
 
 
 
@@ -275,7 +280,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('finance-manager/bills/filter-bills/', [FinanceManagerController::class, 'filterBills']);
   Route::post('finance-manager/bills/search', [FinanceManagerController::class, 'billSearch']);
 
-// Blocked User
+  // Blocked User
 
 
   Route::post('blockuser', [BlockedUserController::class, 'blockuser']);
@@ -283,28 +288,26 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('checkblockuser', [BlockedUserController::class, 'checkblockuser']);
 
 
-//INDIVIDUAL BILL
+  //INDIVIDUAL BILL
 
-// Route::post('individual-bill/createIndividualBill', [IndividualBillController::class, 'createIndividualBill']);
+  // Route::post('individual-bill/createIndividualBill', [IndividualBillController::class, 'createIndividualBill']);
 
-// Route::get('individual-bill/getIndividualBillsForFinance/{subadminid}', [IndividualBillController::class, 'getIndividualBillsForFinance']);
-// Route::get('individual-bill/getIndividualBillsByResident/{residentid}', [IndividualBillController::class, 'getIndividualBillsByResident']);
-// Route::get('individual-bill/filterIndividualBills/', [IndividualBillController::class, 'filterIndividualBills']);
-// Route::get('individual-bill/filterIndividualBillsByResident/', [IndividualBillController::class, 'filterIndividualBillsByResident']);
+  // Route::get('individual-bill/getIndividualBillsForFinance/{subadminid}', [IndividualBillController::class, 'getIndividualBillsForFinance']);
+  // Route::get('individual-bill/getIndividualBillsByResident/{residentid}', [IndividualBillController::class, 'getIndividualBillsByResident']);
+  // Route::get('individual-bill/filterIndividualBills/', [IndividualBillController::class, 'filterIndividualBills']);
+  // Route::get('individual-bill/filterIndividualBillsByResident/', [IndividualBillController::class, 'filterIndividualBillsByResident']);
 
-//Super Admin Finance Managers
+  //Super Admin Finance Managers
 
-// Route::post('superadmin-finance-manager/superAdminFinanceMangerRegister', [SuperAdminFinanceManagerController::class, 'superAdminFinanceMangerRegister']);
-// Route::get('finance-manager/view/{id}', [SuperAdminFinanceManagerController::class, 'view']);
-// Route::post('finance-manager/update', [SuperAdminFinanceManagerController::class, 'update']);
-// Route::get('finance-manager/allresidentsBill/{residentid}', [SuperAdminFinanceManagerController::class, 'allresidentsBill']);
-// Route::get('finance-manager/searchResidentsBill/{residentid}/{q?}', [SuperAdminFinanceManagerController::class, 'searchResidentsBill']);
-// Route::get('super-finance-manager/filterBills/', [SuperAdminFinanceManagerController::class, 'filterBills']);
-// Route::get('super-finance-manager/currentMonthBills/{residentid}', [SuperAdminFinanceManagerController::class, 'currentMonthBills']);
+  // Route::post('superadmin-finance-manager/superAdminFinanceMangerRegister', [SuperAdminFinanceManagerController::class, 'superAdminFinanceMangerRegister']);
+  // Route::get('finance-manager/view/{id}', [SuperAdminFinanceManagerController::class, 'view']);
+  // Route::post('finance-manager/update', [SuperAdminFinanceManagerController::class, 'update']);
+  // Route::get('finance-manager/allresidentsBill/{residentid}', [SuperAdminFinanceManagerController::class, 'allresidentsBill']);
+  // Route::get('finance-manager/searchResidentsBill/{residentid}/{q?}', [SuperAdminFinanceManagerController::class, 'searchResidentsBill']);
+  // Route::get('super-finance-manager/filterBills/', [SuperAdminFinanceManagerController::class, 'filterBills']);
+  // Route::get('super-finance-manager/currentMonthBills/{residentid}', [SuperAdminFinanceManagerController::class, 'currentMonthBills']);
 
-  
 
-  
 
 });
 
@@ -317,9 +320,11 @@ Route::post('login', [RoleController::class, 'login']);
 Route::post('residentlogin', [ResidentController::class, 'residentlogin']);
 Route::post('registeruser', [RoleController::class, 'registeruser']);
 Route::post('forgetpassword', [RoleController::class, 'forgetpassword']);
-Route::get('clear-cache', function() {
-  $exitCode = Artisan::call('cache:clear');
+Route::get('clear-cache', function () {
+  // $exitCode = Artisan::call('cache:clear');
   // return what you want
+
+  dd("hello");
 });
 // for Resident and Family Member
 Route::post('login/mobilenumber', [RoleController::class, 'loginWithMobileNumber']);

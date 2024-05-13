@@ -26,7 +26,7 @@ class ResidentController extends Controller
         $isValidate = Validator::make($request->all(), [
 
             'residentid' => 'required|exists:residents,residentid',
-            ]);
+        ]);
 
 
         if ($isValidate->fails()) {
@@ -37,44 +37,56 @@ class ResidentController extends Controller
             ], 403);
         }
 
-        $chatVisibilty= Resident::where('residentid',$request->residentid)->first();
+        $chatVisibilty = Resident::where('residentid', $request->residentid)->first();
 
-         
 
-       if ($chatVisibilty->visibility=='none')
 
-       {
+        if ($chatVisibilty->visibility == 'none') {
+            return response()->json([
+                'success' => true,
+                'data' => $chatVisibilty->visibility,
+
+
+            ]);
+        }
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $chatVisibilty->visibility,
+
+            ]
+
+        );
+    }
+
+    /////////    get all residents
+
+
+    public function getAllResidentsAA()
+    {
+        $residents = Resident::all();
         return response()->json([
-            'success'=>true,
-            'data' => $chatVisibilty->visibility,
-            
-            
-        ]);
-
-       }
-       return response()->json([
-        'success'=>true,
-        'data' => $chatVisibilty->visibility,
-        
-        ]
-    
-    );
-
-       
-
-
+            "success" => true,
+            "data" => $residents,
+            "message" => "Residents data retrieved successfully"
+        ], 200);
     }
 
 
-      public function updateChatVisibility(Request $request)
-      {
+
+
+
+
+
+    public function updateChatVisibility(Request $request)
+    {
 
         $isValidate = Validator::make($request->all(), [
 
 
             'residentid' => 'required|exists:residents,residentid',
             'visibility' => 'nullable',
-            
+
         ]);
 
 
@@ -88,34 +100,33 @@ class ResidentController extends Controller
 
 
 
-$residentId=$request->residentid;
+        $residentId = $request->residentid;
 
-        $resident = Resident::where('residentid',$residentId)->get()->first();
-       
-     
-        $resident->visibility=$request->visibility;
-        
+        $resident = Resident::where('residentid', $residentId)->get()->first();
+
+
+        $resident->visibility = $request->visibility;
+
         $resident->update();
 
         return response()->json([
             "success" => true,
-            "status"=>$resident->visibility,
+            "status" => $resident->visibility,
 
-        
+
         ]);
+    }
 
-      }
 
-
-      public function updateUserName(Request $request)
-      {
+    public function updateUserName(Request $request)
+    {
 
         $isValidate = Validator::make($request->all(), [
 
 
             'residentid' => 'required|exists:residents,residentid',
             'username' => 'required|unique:residents',
-            
+
         ]);
 
 
@@ -129,119 +140,120 @@ $residentId=$request->residentid;
 
 
 
-$residentId=$request->residentid;
+        $residentId = $request->residentid;
 
-        $resident = Resident::where('residentid',$residentId)->get()->first();
-       
-     
-        $resident->username=$request->username;
-        
+        $resident = Resident::where('residentid', $residentId)->get()->first();
+
+
+        $resident->username = $request->username;
+
         $resident->update();
 
         return response()->json([
             "success" => true,
-            "message"=>"Username updated Successfully"
+            "message" => "Username updated Successfully"
 
-        
+
         ]);
+    }
 
-      }
+    public function searchresident($subadminid, $q)
+    {
 
-      public function searchresident($subadminid, $q)
-      {
-  
-  
-          $resident = Resident::where(function ($query) use ($q) {
-              $query->where('firstname', 'LIKE', '%' . $q . '%')
-                  ->orWhere('lastname', 'LIKE', '%' . $q . '%')
-                  ->orWhere('mobileno', 'LIKE', '%' . $q . '%')
-                  ->orWhere('address', 'LIKE', '%' . $q . '%');
-          })
-              ->where('status', 1)->where('subadminid', $subadminid)->join('users', 'users.id', '=', 'residents.residentid',)->get();
-  
-  
-          // $data = Resident::join('users', 'users.id', '=', 'residents.residentid',)
-          //     ->Where('residents.residentid', $residentid)
-          //     ->Where('users.firstname', 'LIKE', '%' . $q . '%')
-          //     ->orWhere('users.lastname', 'LIKE', '%' . $q . '%')
-          //     ->orWhere('users.mobileno', 'LIKE', '%' . $q . '%')
-          //     //->orWhere('users.cnic', 'LIKE', '%' . $q . '%')
-  
-  
-          //     ->orWhere('users.address', 'LIKE', '%' . $q . '%')->with('bills')
-          //     // ->orWhere('residents.vechileno', 'LIKE', '%' . $q . '%')
-          //     ->get();
-  
-  
-          return response()->json(
-              [
-                  "success" => true,
-                  "residentslist" => $resident
-              ]
-          );
-      }
-  
-      public function filterResident($subadminid, $type)
-      {
-  
-  
-          $resident = Resident::where('propertytype', $type)->where('subadminid', $subadminid)
-              ->join('users', 'users.id', '=', 'residents.residentid',)->get();
-  
-  
-  
-  
-          return response()->json(
-              [
-                  "success" => true,
-                  "residentslist" => $resident
-              ]
-          );
-      }
-  
+
+        $resident = Resident::where(function ($query) use ($q) {
+            $query->where('firstname', 'LIKE', '%' . $q . '%')
+                ->orWhere('lastname', 'LIKE', '%' . $q . '%')
+                ->orWhere('mobileno', 'LIKE', '%' . $q . '%')
+                ->orWhere('address', 'LIKE', '%' . $q . '%');
+        })
+            ->where('status', 1)->where('subadminid', $subadminid)->join('users', 'users.id', '=', 'residents.residentid',)->get();
+
+
+        // $data = Resident::join('users', 'users.id', '=', 'residents.residentid',)
+        //     ->Where('residents.residentid', $residentid)
+        //     ->Where('users.firstname', 'LIKE', '%' . $q . '%')
+        //     ->orWhere('users.lastname', 'LIKE', '%' . $q . '%')
+        //     ->orWhere('users.mobileno', 'LIKE', '%' . $q . '%')
+        //     //->orWhere('users.cnic', 'LIKE', '%' . $q . '%')
+
+
+        //     ->orWhere('users.address', 'LIKE', '%' . $q . '%')->with('bills')
+        //     // ->orWhere('residents.vechileno', 'LIKE', '%' . $q . '%')
+        //     ->get();
+
+
+        return response()->json(
+            [
+                "success" => true,
+                "residentslist" => $resident
+            ]
+        );
+    }
+
+    public function filterResident($subadminid, $type)
+    {
+
+
+        $resident = Resident::where('propertytype', $type)->where('subadminid', $subadminid)
+            ->join('users', 'users.id', '=', 'residents.residentid',)->get();
+
+
+
+
+        return response()->json(
+            [
+                "success" => true,
+                "residentslist" => $resident
+            ]
+        );
+    }
+
     public function registerresident(Request $request)
 
 
     {
 
-        $isValidate = Validator::make($request->all(), 
-        [
+        $isValidate = Validator::make(
+            $request->all(),
+            [
 
 
-            "residentid" => 'required|exists:users,id',
-            "subadminid" => 'required|exists:users,id',
+                "residentid" => 'required|exists:users,id',
+                "subadminid" => 'required|exists:users,id',
 
-            "country" => "nullable",
-            "state" => "nullable",
-            "city" => "nullable",
-            "houseaddress" => "required",
-            "residenttype" => "required",
-            "propertytype" => "required",
-            "committeemember" => "required",
-            "status" => "required",
-            "vechileno" => "nullable",
+                "country" => "nullable",
+                "state" => "nullable",
+                "city" => "nullable",
+                "houseaddress" => "required",
+                "residenttype" => "required",
+                "propertytype" => "required",
+                "committeemember" => "required",
+                "status" => "required",
+                "vechileno" => "nullable",
 
-            /* owner details */
+                /* owner details */
 
-            "ownername" => "nullable",
-            "owneraddress" => "nullable",
-            "ownermobileno" => "nullable",
+                "ownername" => "nullable",
+                "owneraddress" => "nullable",
+                "ownermobileno" => "nullable",
 
-            /* apartment/houses details */
+                /* apartment/houses details */
 
-            "societyid" => "nullable",
-            "pid" => "nullable",
-            "bid" => "nullable",
-            "sid" => "nullable",
-            "propertyid" => "nullable",
-            "buildingid" => "nullable",
-            "societybuildingfloorid" => "nullable",
-            "societybuildingapartmentid" => "nullable",
-            "measurementid" => "nullable"
+                "societyid" => "nullable",
+                "pid" => "nullable",
+                "bid" => "nullable",
+                "sid" => "nullable",
+                "propertyid" => "nullable",
+                "buildingid" => "nullable",
+                "societybuildingfloorid" => "nullable",
+                "societybuildingapartmentid" => "nullable",
+                "measurementid" => "nullable"
 
 
 
-        ]);
+            ]
+        );
 
         if ($isValidate->fails()) {
             return response()->json([
@@ -253,38 +265,35 @@ $residentId=$request->residentid;
 
 
 
-        if ($request->propertytype == 'house')  {
+        if ($request->propertytype == 'house') {
 
 
 
 
             $property = Property::find($request->propertyid);
-            
 
-            if($property->occupied==1)
 
-            {
+            if ($property->occupied == 1) {
                 return response()->json(
                     [
-        
+
                         "success" => true,
                         "message" => "Property Already Ocuupied by an other User.",
-                        
-        
-                    ],409
+
+
+                    ],
+                    409
                 );
-
-
             }
-    
+
 
 
             $resident = new Resident;
             $resident->residentid = $request->residentid;
             $resident->subadminid = $request->subadminid;
-            $resident->country = $request->country??"";
-            $resident->state = $request->state??"";
-            $resident->city = $request->city??"";
+            $resident->country = $request->country ?? "";
+            $resident->state = $request->state ?? "";
+            $resident->city = $request->city ?? "";
             $resident->houseaddress = $request->houseaddress ?? 'NA';
             $resident->vechileno = $request->vechileno ?? '';
             $resident->residenttype = $request->residenttype;
@@ -301,113 +310,108 @@ $residentId=$request->residentid;
                 $owner->ownermobileno = $request->ownermobileno ?? "NA";
                 $owner->save();
             }
-    
-    
+
+
 
 
             $address  = new Houseresidentaddress;
             $address->residentid = $request->residentid;
             $address->societyid = $request->societyid;
-            $address->pid = $request->pid??0;
-            $address->bid = $request->bid??0;
-            $address->sid = $request->sid??0;
+            $address->pid = $request->pid ?? 0;
+            $address->bid = $request->bid ?? 0;
+            $address->sid = $request->sid ?? 0;
             $address->propertyid = $request->propertyid;
             $address->measurementid = $request->measurementid;
             $address->save();
 
             $subadmins = Subadmin::where('subadminid', $request->subadminid)
-            ->join('users', 'users.id', '=', 'subadmins.subadminid')->get();
+                ->join('users', 'users.id', '=', 'subadmins.subadminid')->get();
 
-        $fcm = [];
-
-      
-
-        foreach ($subadmins as $datavals) {
-            array_push($fcm, $datavals->fcmtoken);
-        }
-
-       
-
-        $url = 'https://fcm.googleapis.com/fcm/send';
-        $mydata = [
-            'registration_ids' => $fcm,
-
-            "data" => ["type" => 'Verification'],
-            "android" => [
-                "priority" => "high",
-                "ttl" => 60 * 60 * 1,
-                "android_channel_id" => "pushnotificationapp"
-
-            ],
-            "notification" => [
-                'title' => 'Verification ✅', 
-                'body' => 'You have Verification request from '. $resident->houseaddress.".",
-            ]
-
-        ];
-        $finaldata = json_encode($mydata);
-        $headers = array(
-            'Authorization: key=' . Config('app.serverkey'),
-            'Content-Type: application/json'
-        );
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $finaldata);
-        $result = curl_exec($ch);
-        // var_dump($result);
-        curl_close($ch);
+            $fcm = [];
 
 
-            
+
+            foreach ($subadmins as $datavals) {
+                array_push($fcm, $datavals->fcmtoken);
+            }
 
 
-            
+
+            $url = 'https://fcm.googleapis.com/fcm/send';
+            $mydata = [
+                'registration_ids' => $fcm,
+
+                "data" => ["type" => 'Verification'],
+                "android" => [
+                    "priority" => "high",
+                    "ttl" => 60 * 60 * 1,
+                    "android_channel_id" => "pushnotificationapp"
+
+                ],
+                "notification" => [
+                    'title' => 'Verification ✅',
+                    'body' => 'You have Verification request from ' . $resident->houseaddress . ".",
+                ]
+
+            ];
+            $finaldata = json_encode($mydata);
+            $headers = array(
+                'Authorization: key=' . Config('app.serverkey'),
+                'Content-Type: application/json'
+            );
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $finaldata);
+            $result = curl_exec($ch);
+            // var_dump($result);
+            curl_close($ch);
+
+
+
+
+
+
 
 
             return response()->json(
                 [
-    
+
                     "success" => true,
                     "message" => "User Register  Successfully.",
-                    
-    
+
+
                 ]
             );
-        } 
-        else if($request->propertytype == 'apartment')
-        {
+        } else if ($request->propertytype == 'apartment') {
 
-            
+
             $societyBuildingaAartment = Societybuildingapartment::find($request->societybuildingapartmentid);
-            
 
-            if($societyBuildingaAartment ->occupied==1)
 
-            {
+            if ($societyBuildingaAartment->occupied == 1) {
                 return response()->json(
                     [
-        
+
                         "success" => true,
                         "message" => "Apartment Already Ocuupied by an other User.",
-                        
-        
-                    ],409
+
+
+                    ],
+                    409
                 );
-
-
             }
-    
+
 
             $resident = new Resident;
             $resident->residentid = $request->residentid;
             $resident->subadminid = $request->subadminid;
-            $resident->country = $request->country??"";
-            $resident->state = $request->state??"";
-            $resident->city = $request->city??"";
+            $resident->country = $request->country ?? "";
+            $resident->state = $request->state ?? "";
+            $resident->city = $request->city ?? "";
             $resident->houseaddress = $request->houseaddress ?? 'NA';
             $resident->vechileno = $request->vechileno ?? '';
             $resident->residenttype = $request->residenttype;
@@ -424,8 +428,8 @@ $residentId=$request->residentid;
                 $owner->ownermobileno = $request->ownermobileno ?? "NA";
                 $owner->save();
             }
-    
-    
+
+
 
 
             $address  = new Apartmentresidentaddress;
@@ -439,96 +443,90 @@ $residentId=$request->residentid;
 
 
             $subadmins = Subadmin::where('subadminid', $request->subadminid)
-            ->join('users', 'users.id', '=', 'subadmins.subadminid')->get();
+                ->join('users', 'users.id', '=', 'subadmins.subadminid')->get();
 
-        $fcm = [];
+            $fcm = [];
 
-      
 
-        foreach ($subadmins as $datavals) {
-            array_push($fcm, $datavals->fcmtoken);
-        }
 
-       
+            foreach ($subadmins as $datavals) {
+                array_push($fcm, $datavals->fcmtoken);
+            }
 
-        $url = 'https://fcm.googleapis.com/fcm/send';
-        $mydata = [
-            'registration_ids' => $fcm,
 
-            "data" => ["type" => 'Verification'],
-            "android" => [
-                "priority" => "high",
-                "ttl" => 60 * 60 * 1,
-                "android_channel_id" => "pushnotificationapp"
 
-            ],
-            "notification" => [
-                'title' => 'Verification ✅', 
-                'body' => 'You have Verification request from '. $resident->houseaddress.".",
-            ]
+            $url = 'https://fcm.googleapis.com/fcm/send';
+            $mydata = [
+                'registration_ids' => $fcm,
 
-        ];
-        $finaldata = json_encode($mydata);
-        $headers = array(
-            'Authorization: key=' . Config('app.serverkey'),
-            'Content-Type: application/json'
-        );
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $finaldata);
-        $result = curl_exec($ch);
-        // var_dump($result);
-        curl_close($ch);
+                "data" => ["type" => 'Verification'],
+                "android" => [
+                    "priority" => "high",
+                    "ttl" => 60 * 60 * 1,
+                    "android_channel_id" => "pushnotificationapp"
+
+                ],
+                "notification" => [
+                    'title' => 'Verification ✅',
+                    'body' => 'You have Verification request from ' . $resident->houseaddress . ".",
+                ]
+
+            ];
+            $finaldata = json_encode($mydata);
+            $headers = array(
+                'Authorization: key=' . Config('app.serverkey'),
+                'Content-Type: application/json'
+            );
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $finaldata);
+            $result = curl_exec($ch);
+            // var_dump($result);
+            curl_close($ch);
 
 
 
 
             return response()->json(
                 [
-    
+
                     "success" => true,
                     "message" => "User Register  Successfully",
-                    
-    
+
+
                 ]
             );
-        }
+        } else {
 
-        else  {
- 
 
             $localBuildingApartment = Localbuildingapartment::find($request->aid);
-            
 
-            if($localBuildingApartment ->occupied==1)
 
-            {
-              
+            if ($localBuildingApartment->occupied == 1) {
+
                 return response()->json(
                     [
-        
+
                         "success" => true,
                         "message" => "Apartment Already Ocuupied by an other User.",
-                        
-        
-                    ],409
+
+
+                    ],
+                    409
                 );
-               
-
-
             }
 
 
             $resident = new Resident;
             $resident->residentid = $request->residentid;
             $resident->subadminid = $request->subadminid;
-            $resident->country = $request->country??"";
-            $resident->state = $request->state??"";
-            $resident->city = $request->city??"";
+            $resident->country = $request->country ?? "";
+            $resident->state = $request->state ?? "";
+            $resident->city = $request->city ?? "";
             $resident->houseaddress = $request->houseaddress ?? 'NA';
             $resident->vechileno = $request->vechileno ?? '';
             $resident->residenttype = $request->residenttype;
@@ -537,8 +535,8 @@ $residentId=$request->residentid;
             $resident->status = $request->status ?? 0;
             $resident->save();
 
-            
-                 if ($resident->residenttype == 'Rental') {
+
+            if ($resident->residenttype == 'Rental') {
                 $owner = new Owner;
                 $owner->residentid = $resident->residentid;
                 $owner->ownername = $request->ownername ?? "NA";
@@ -558,73 +556,64 @@ $residentId=$request->residentid;
 
 
             $subadmins = Subadmin::where('subadminid', $request->subadminid)
-            ->join('users', 'users.id', '=', 'subadmins.subadminid')->get();
+                ->join('users', 'users.id', '=', 'subadmins.subadminid')->get();
 
-        $fcm = [];
+            $fcm = [];
 
-      
 
-        foreach ($subadmins as $datavals) {
-            array_push($fcm, $datavals->fcmtoken);
-        }
 
-       
+            foreach ($subadmins as $datavals) {
+                array_push($fcm, $datavals->fcmtoken);
+            }
 
-        $url = 'https://fcm.googleapis.com/fcm/send';
-        $mydata = [
-            'registration_ids' => $fcm,
 
-            "data" => ["type" => 'Verification'],
-            "android" => [
-                "priority" => "high",
-                "ttl" => 60 * 60 * 1,
-                "android_channel_id" => "pushnotificationapp"
 
-            ],
-            "notification" => [
-                'title' => 'Verification ✅', 
-                'body' => 'You have Verification request from '. $resident->houseaddress.".",
-            ]
+            $url = 'https://fcm.googleapis.com/fcm/send';
+            $mydata = [
+                'registration_ids' => $fcm,
 
-        ];
-        $finaldata = json_encode($mydata);
-        $headers = array(
-            'Authorization: key=' . Config('app.serverkey'),
-            'Content-Type: application/json'
-        );
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $finaldata);
-        $result = curl_exec($ch);
-        // var_dump($result);
-        curl_close($ch);
+                "data" => ["type" => 'Verification'],
+                "android" => [
+                    "priority" => "high",
+                    "ttl" => 60 * 60 * 1,
+                    "android_channel_id" => "pushnotificationapp"
+
+                ],
+                "notification" => [
+                    'title' => 'Verification ✅',
+                    'body' => 'You have Verification request from ' . $resident->houseaddress . ".",
+                ]
+
+            ];
+            $finaldata = json_encode($mydata);
+            $headers = array(
+                'Authorization: key=' . Config('app.serverkey'),
+                'Content-Type: application/json'
+            );
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $finaldata);
+            $result = curl_exec($ch);
+            // var_dump($result);
+            curl_close($ch);
 
 
 
 
             return response()->json(
                 [
-    
+
                     "success" => true,
                     "message" => "User Register  Successfully",
-                    
-    
+
+
                 ]
             );
-    
         }
-
-
-
-       
-
-
-
-      
     }
 
     public function viewresidents($id)
@@ -849,18 +838,18 @@ $residentId=$request->residentid;
     public function unverifiedhouseresident($subadminid, $status)
 
     {
-        
+
         $residents = Resident::where('subadminid', $subadminid)->where('status', $status)->where('propertytype', 'house')
-        ->join('houseresidentaddresses', 'residents.residentid', '=', 'houseresidentaddresses.residentid')->join('users', 'users.id', '=', 'houseresidentaddresses.residentid')
-        ->with('society')
-        ->with('phase')
-        ->with('block')
-        ->with('street')
-        ->with('property')
-        ->with('measurement')->with('owner')->get();
+            ->join('houseresidentaddresses', 'residents.residentid', '=', 'houseresidentaddresses.residentid')->join('users', 'users.id', '=', 'houseresidentaddresses.residentid')
+            ->with('society')
+            ->with('phase')
+            ->with('block')
+            ->with('street')
+            ->with('property')
+            ->with('measurement')->with('owner')->get();
 
 
-    
+
 
 
         return response()->json([
@@ -875,7 +864,7 @@ $residentId=$request->residentid;
     public function unverifiedapartmentresident($subadminid, $status)
 
     {
-       
+
 
 
         $residents = Resident::where('subadminid', $subadminid)->where('status', $status)->where('propertytype', 'apartment')
@@ -924,30 +913,27 @@ $residentId=$request->residentid;
 
             ], 403);
         }
-      
+
         $property = Property::find($request->propertyid);
-            
 
-        if($property->occupied==1)
 
-        {
+        if ($property->occupied == 1) {
             return response()->json(
                 [
-    
+
                     "success" => true,
                     "message" => "Property Already Ocuupied by an other User.",
-                    
-    
-                ],409
+
+
+                ],
+                409
             );
-
-
         }
-        
+
 
         $property = Property::find($request->propertyid);
 
-        $property->occupied=1;
+        $property->occupied = 1;
         $property->update();
 
 
@@ -955,10 +941,10 @@ $residentId=$request->residentid;
 
         $residents = Houseresidentaddress::where('residentid', $request->residentid)->first();
 
-        
 
-        $residents->pid = $request->pid??0;
-        $residents->bid = $request->bid??0;
+
+        $residents->pid = $request->pid ?? 0;
+        $residents->bid = $request->bid ?? 0;
         $residents->sid = $request->sid;
         $residents->propertyid = $request->propertyid;
         $residents->measurementid = $request->measurementid;
@@ -979,65 +965,52 @@ $residentId=$request->residentid;
 
 
 
-        $fcm=[];
+        $fcm = [];
 
-        $residents= Resident::where('residentid',$request->residentid)
-        ->join('users','users.id','=','residents.residentid')->get();
+        $residents = Resident::where('residentid', $request->residentid)
+            ->join('users', 'users.id', '=', 'residents.residentid')->get();
 
-        
-      
+
+
 
         foreach ($residents as $datavals) {
 
             array_push($fcm, $datavals['fcmtoken']);
-
         }
 
-           
+
         $url = 'https://fcm.googleapis.com/fcm/send';
-        $mydata=['registration_ids'=>$fcm,
- 
-        "data"=>["type"=>'Verification'],
-        "android"=> [
-            "priority"=> "high",
-            "ttl"=> 60 * 60 * 1,
+        $mydata = [
+            'registration_ids' => $fcm,
 
-        ],
-        "notification"=>['title'=>'Verification','body'=>'you are successfully registered ✅',
-        
-        
-        ]
+            "data" => ["type" => 'Verification'],
+            "android" => [
+                "priority" => "high",
+                "ttl" => 60 * 60 * 1,
 
-    ];
-    $finaldata=json_encode($mydata);
-        $headers = array (
+            ],
+            "notification" => [
+                'title' => 'Verification', 'body' => 'you are successfully registered ✅',
+
+
+            ]
+
+        ];
+        $finaldata = json_encode($mydata);
+        $headers = array(
             'Authorization: key=' .  Config('app.serverkey'),
             'Content-Type: application/json'
         );
-        $ch = curl_init ();
-        curl_setopt ( $ch, CURLOPT_URL, $url );
-        curl_setopt ( $ch, CURLOPT_POST, true );
-        curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
-        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
-        curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, false );
-        curl_setopt ( $ch, CURLOPT_POSTFIELDS, $finaldata );
-        $result = curl_exec ( $ch );
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $finaldata);
+        $result = curl_exec($ch);
         // var_dump($result);
-        curl_close ( $ch );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        curl_close($ch);
         return response()->json([
             "success" => true,
             "data" => $residents
@@ -1072,27 +1045,22 @@ $residentId=$request->residentid;
         }
 
         $societyBuildingApartment = Societybuildingapartment::find($request->societybuildingapartmentid);
-            
 
-        if($societyBuildingApartment ->occupied==1)
 
-        {
+        if ($societyBuildingApartment->occupied == 1) {
             return response()->json(
                 [
-    
+
                     "success" => true,
                     "message" => "Property Already Ocuupied by an other User.",
-                    
-    
-                ],409
+                ],
+                409
             );
-
-
         }
-        
+
 
         $societyBuildingApartment = Societybuildingapartment::find($request->societybuildingapartmentid);
-        $societyBuildingApartment->occupied=1;
+        $societyBuildingApartment->occupied = 1;
         $societyBuildingApartment->update();
 
 
@@ -1119,58 +1087,49 @@ $residentId=$request->residentid;
 
 
 
-        $fcm=[];
+        $fcm = [];
 
-        $residents= Resident::where('residentid',$request->residentid)
-        ->join('users','users.id','=','residents.residentid')->get();
+        $residents = Resident::where('residentid', $request->residentid)
+            ->join('users', 'users.id', '=', 'residents.residentid')->get();
 
-        
-      
+
+
 
         foreach ($residents as $datavals) {
-
             array_push($fcm, $datavals['fcmtoken']);
-
         }
 
-           
+
         $url = 'https://fcm.googleapis.com/fcm/send';
-        $mydata=['registration_ids'=>$fcm,
- 
-        "data"=>["type"=>'Verification'],
-        "android"=> [
-            "priority"=> "high",
-            "ttl"=> 60 * 60 * 1,
+        $mydata = [
+            'registration_ids' => $fcm,
 
-        ],
-        "notification"=>['title'=>'Verification','body'=>'you are successfully registered ✅',
-        
-        
-        ]
+            "data" => ["type" => 'Verification'],
+            "android" => [
+                "priority" => "high",
+                "ttl" => 60 * 60 * 1,
 
-    ];
-    $finaldata=json_encode($mydata);
-        $headers = array (
+            ],
+            "notification" => [
+                'title' => 'Verification', 'body' => 'you are successfully registered ✅',
+            ]
+
+        ];
+        $finaldata = json_encode($mydata);
+        $headers = array(
             'Authorization: key=' .  Config('app.serverkey'),
             'Content-Type: application/json'
         );
-        $ch = curl_init ();
-        curl_setopt ( $ch, CURLOPT_URL, $url );
-        curl_setopt ( $ch, CURLOPT_POST, true );
-        curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
-        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
-        curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, false );
-        curl_setopt ( $ch, CURLOPT_POSTFIELDS, $finaldata );
-        $result = curl_exec ( $ch );
-        // var_dump($result);
-        curl_close ( $ch );
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $finaldata);
+        $result = curl_exec($ch);
 
-
-
-
-
-
-
+        curl_close($ch);
 
         return response()->json([
             "success" => true,
@@ -1207,25 +1166,22 @@ $residentId=$request->residentid;
 
 
         $localBuildingApartment = Localbuildingapartment::find($request->aid);
-            
 
-        if($localBuildingApartment ->occupied==1)
 
-        {
+        if ($localBuildingApartment->occupied == 1) {
             return response()->json(
                 [
-    
+
                     "success" => true,
                     "message" => "Apartment Already Ocuupied by an other User.",
-                    
-    
-                ],409
+
+
+                ],
+                409
             );
-
-
         }
         $localBuildingApartment = Localbuildingapartment::find($request->aid);
-        $localBuildingApartment->occupied=1;
+        $localBuildingApartment->occupied = 1;
         $localBuildingApartment->update();
 
 
@@ -1251,51 +1207,52 @@ $residentId=$request->residentid;
         $user->update();
 
 
-        $fcm=[];
+        $fcm = [];
 
-        $residents= Resident::where('residentid',$request->residentid)
-        ->join('users','users.id','=','residents.residentid')->get();
+        $residents = Resident::where('residentid', $request->residentid)
+            ->join('users', 'users.id', '=', 'residents.residentid')->get();
 
-        
-      
+
+
 
         foreach ($residents as $datavals) {
 
             array_push($fcm, $datavals['fcmtoken']);
-
         }
 
-           
+
         $url = 'https://fcm.googleapis.com/fcm/send';
-        $mydata=['registration_ids'=>$fcm,
- 
-        "data"=>["type"=>'Verification'],
-        "android"=> [
-            "priority"=> "high",
-            "ttl"=> 60 * 60 * 1,
+        $mydata = [
+            'registration_ids' => $fcm,
 
-        ],
-        "notification"=>['title'=>'Verification','body'=>'you are successfully registered ✅',
-        
-        
-        ]
+            "data" => ["type" => 'Verification'],
+            "android" => [
+                "priority" => "high",
+                "ttl" => 60 * 60 * 1,
 
-    ];
-    $finaldata=json_encode($mydata);
-        $headers = array (
+            ],
+            "notification" => [
+                'title' => 'Verification', 'body' => 'you are successfully registered ✅',
+
+
+            ]
+
+        ];
+        $finaldata = json_encode($mydata);
+        $headers = array(
             'Authorization: key=' .  Config('app.serverkey'),
             'Content-Type: application/json'
         );
-        $ch = curl_init ();
-        curl_setopt ( $ch, CURLOPT_URL, $url );
-        curl_setopt ( $ch, CURLOPT_POST, true );
-        curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
-        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
-        curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, false );
-        curl_setopt ( $ch, CURLOPT_POSTFIELDS, $finaldata );
-        $result = curl_exec ( $ch );
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $finaldata);
+        $result = curl_exec($ch);
         // var_dump($result);
-        curl_close ( $ch );
+        curl_close($ch);
 
 
 
@@ -1314,7 +1271,7 @@ $residentId=$request->residentid;
     public function unverifiedlocalbuildingapartmentresident($subadminid, $status)
 
     {
-      
+
 
 
         $residents = Resident::where('subadminid', $subadminid)->where('status', $status)->where('propertytype', 'localbuildingapartment')
@@ -1338,23 +1295,19 @@ $residentId=$request->residentid;
 
     public function unverifiedresidentcount($subadminid)
     {
-    
-       
-    
-    
-    $count = Resident::where('subadminid',$subadminid)->where('status','0')->count();
-        
-    
-    
-    
+
+
+
+
+        $count = Resident::where('subadminid', $subadminid)->where('status', '0')->count();
+
+
+
+
         return response()->json([
             "success" => true,
             "data" => $count,
-    
-        ]);
-    
-    
-    }
-    
 
+        ]);
+    }
 }

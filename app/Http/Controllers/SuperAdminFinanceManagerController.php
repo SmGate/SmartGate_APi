@@ -137,6 +137,8 @@ class SuperAdminFinanceManagerController extends Controller
             "message" => "Deleted successfully"
         ]);
     }
+
+
     public function update(Request $request)
     {
         $isValidate = Validator::make($request->all(), [
@@ -592,5 +594,4 @@ class SuperAdminFinanceManagerController extends Controller
             "residentslist" => $bills,
         ]);
     }
-
 }
