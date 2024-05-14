@@ -11,20 +11,31 @@ class Bill extends Model
 
 
     protected $fillable = [
-
-        'residentid',
-
+        "charges",
+        "latecharges",
+        "appcharges",
+        "tax",   
+        "payableamount",
+        "balance",
+        "subadminid",
+        "financemanagerid",
+        "residentid",    
+        "propertyid",
+        "measurementid",
+        "duedate", 
+        "billstartdate",
+        "billenddate",    
+        "charges",
         "charges",
         "chargesafterduedate",
-        "appcharges",
-        "tax",    "balance",
-        "subadminid",
-        "residentid",    "propertyid",
-        "measurementid",
-        "duedate", "billstartdate",
-
-        "billenddate",    "month", "status", "description", "specific_type", 
-
+        "paymenttype",
+        "billtype",
+        "noofappusers",
+        "month", 
+        "status", 
+        "description", 
+        "specific_type", 
+        "totalpaidamount", 
     ];
 
     public function user()

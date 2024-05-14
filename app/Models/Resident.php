@@ -34,6 +34,10 @@ protected $table = 'residents';
         "status",
     ];
 
+    public function user()
+    {
+        return $this->hasOne(User::class,'id','residentid');
+    }
 
     public function society()
     {

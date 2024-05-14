@@ -20,11 +20,7 @@ class BillController extends Controller
 
     public function generatehousebill(Request $request)
     {
-
-
-
         $isValidate = Validator::make($request->all(), [
-
             'subadminid' => 'required|exists:users,id',
             'financemanagerid' => 'required|exists:financemanagers,financemanagerid',
             'duedate' => 'required|date|after:billenddate',
@@ -32,15 +28,12 @@ class BillController extends Controller
             'billenddate' => 'required|date|after:billstartdate',
             'status' => 'required|in:paid,unpaid,partiallypaid',
         ]);
-
-
         if ($isValidate->fails()) {
             return response()->json([
                 "errors" => $isValidate->errors()->all(),
                 "success" => false
             ], 403);
         }
-
         $noOfAppUsers = 1;
         $charges = 0.0;
         $latecharges = 0.0;
@@ -81,31 +74,19 @@ class BillController extends Controller
 
 
         foreach ($residents as $residents) {
-
-            // fetching resident details from db
-
             $residnentsLi = Houseresidentaddress::where('houseresidentaddresses.residentid', $residents->residentid)
                 ->join('residents', 'houseresidentaddresses.residentid', '=', 'residents.residentid')
                 ->with('property')
                 ->with('measurement')
                 ->first();
-
-
             $measurement =  $residnentsLi->measurement;
-
             $property =  $residnentsLi->property;
             $residnentid = $residnentsLi->residentid;
-
-
-
             $noOfusers = Familymember::where('subadminid', $subadminid)->where('residentid', $residnentid)->count();
             $residentItSelf = 1;
             $noOfAppUsers = $noOfusers + $residentItSelf;
-
-
             $getmonth = Carbon::parse($billstartdate)->format('F Y');
             $month = $getmonth;
-
 
             foreach ($measurement as $measurement) {
                 $measurementid = $measurement->id;
