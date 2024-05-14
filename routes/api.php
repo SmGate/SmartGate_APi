@@ -1,4 +1,4 @@
-<?php
++<?php
 
 use App\Http\Controllers\BlockedUserController;
 use Illuminate\Support\Facades\Route;
@@ -32,13 +32,15 @@ use App\Http\Controllers\VistorDetailController;
 use App\Http\Controllers\MarketPlaceController;
 use App\Http\Controllers\EmergencyController;
 use App\Http\Controllers\FinanceManagerController;
+use App\Http\Controllers\AutoBillController;
 
 
 
 
 
 
-Route::middleware(['auth:sanctum'])->group(function () {
+
+// Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
@@ -288,6 +290,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('checkblockuser', [BlockedUserController::class, 'checkblockuser']);
 
 
+  //Auto bills
+  Route::resource('auto-bills', AutoBillController::class);
+
   //INDIVIDUAL BILL
 
   // Route::post('individual-bill/createIndividualBill', [IndividualBillController::class, 'createIndividualBill']);
@@ -309,7 +314,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
-});
+// });
 
 
 

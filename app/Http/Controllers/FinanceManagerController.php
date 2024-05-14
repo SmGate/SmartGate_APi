@@ -215,32 +215,22 @@ class FinanceManagerController extends Controller
 
     public function currentMonthBills($subadminid, $financemanagerid)
     {
-
-
-
-
-
         $currentDate = date('Y-m-d');
         $currentYear = date('Y', strtotime($currentDate));
-
         $currentMonth = date('m', strtotime($currentDate));
-
-
         $bills = Bill::where('subadminid', $subadminid)->where("financemanagerid", $financemanagerid)
-            ->whereMonth('billenddate', $currentMonth)
+            // ->whereMonth('billenddate', $currentMonth)
             ->whereYear(
                 'billenddate',
                 $currentYear
-            )->with('resident')
-            ->with('user')
-            ->with('measurement')
-            ->get();
-
-
-
-
-
-
+            )->with(['resident','user','measurement'])
+            ->get()
+            ->map(function ($bill) {
+                $billenddate = \Carbon\Carbon::parse($bill->billenddate);
+                // Add the is_previous key based on whether billenddate is in the past
+                $bill->is_previous = $billenddate->isPast() ? true : false;
+                return $bill;
+            });
         return response()->json([
             "success" => true,
             "data" => $bills,
@@ -257,18 +247,16 @@ class FinanceManagerController extends Controller
         $enddate = request()->enddate ?? null;
         $subadminid = request()->subadminid ?? null;
         $financemanagerid = request()->financemanagerid ?? null;
+        $is_previous = request()->is_previous ?? null;
 
 
         $isValidate = Validator::make(request()->all(), [
-
             'startdate' => 'date|nullable',
             'enddate' => 'date|nullable',
             'paymenttype' => 'nullable',
             'status' => 'nullable',
             'subadminid' => 'required|exists:subadmins,subadminid',
             'financemanagerid' => 'required|exists:financemanagers,financemanagerid',
-
-
         ]);
         if ($isValidate->fails()) {
             return response()->json([

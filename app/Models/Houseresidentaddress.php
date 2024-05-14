@@ -10,7 +10,7 @@ class Houseresidentaddress extends Model
     use HasFactory;
 
     protected $table = "houseresidentaddresses";
-    protected $primarykey='residentid';
+    // protected $primarykey='residentid';
 
     protected $fillable = [
         "residentid",

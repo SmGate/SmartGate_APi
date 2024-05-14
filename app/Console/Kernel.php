@@ -21,7 +21,7 @@ Commands\MonthlyBillUpdate::class
    ];
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('monthlyBillUpdate')->everyMinute();;
+        $schedule->command('monthlyBillUpdate')->everyMinute();
     }
 
     /**
