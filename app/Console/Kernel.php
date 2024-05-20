@@ -22,6 +22,8 @@ Commands\MonthlyBillUpdate::class
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('monthlyBillUpdate')->everyMinute();
+        $schedule->command('auto-generate-bill')->daily();
+
     }
 
     /**

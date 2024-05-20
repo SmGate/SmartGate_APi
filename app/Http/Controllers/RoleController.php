@@ -3,15 +3,60 @@
 namespace App\Http\Controllers;
 
 use App\Event\ChatEvent;
+use App\Models\Role;
+use App\Traits\TransformerTrait;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Str;
 class RoleController extends Controller
 {
-
+    public function index()
+    {
+        $roles = Role::get();
+        return TransformerTrait::successResponse($roles);
+    }
+    public function store(Request $request)
+    {
+        $isValidate = Validator::make($request->all(), [
+            'name' => 'required',
+        ]);
+        if ($isValidate->fails()) {
+            return TransformerTrait::errorResponse($isValidate->errors()->all(),null ,403);
+        }
+        $role = new Role();
+        $role->name = $request->name;
+        $role->slug = Str::slug($request->name);
+        $role->save();
+        if(!$role)
+        {
+            return TransformerTrait::errorResponse();
+        }
+        return TransformerTrait::successResponse($role,'Role Added Successfully');
+    }
+    public function update(Request $request , $id)
+    {
+        $role = Role::find($id);
+        if(empty($role))
+        {
+            return TransformerTrait::errorResponse(['no matching record found']);
+        }
+        $role->name =$request->name ?? $role->name;
+        $role->slug = Str::slug($request->name);
+        $role->save();
+        return TransformerTrait::successResponse($role,'Record Updated Successfully');
+    }
+    public function destroy($id)
+    {
+        $role = Role::find($id);
+        if(empty($role)){
+            return TransformerTrait::errorResponse(['no matching record found']);
+        }
+        return TransformerTrait::successResponse($role,'Record Deleted Successfully');
+    }
     public function registeruser(Request $request)
     {
         $isValidate = Validator::make($request->all(), [
@@ -79,91 +124,91 @@ class RoleController extends Controller
             'password' => 'required',
         ]);
         if ($isValidate->fails()) {
-            return response()->json([
-                "errors" => $isValidate->errors()->all(),
-                "success" => false
-            ], 403);
-        } else if (Auth::attempt(['cnic' => $request->cnic, 'password' => $request->password])) {
+            return TransformerTrait::errorResponse($isValidate->errors()->all(),null,403);
+        } 
+        if(Auth::attempt(['cnic' => $request->cnic, 'password' => $request->password])) {
             $user = Auth::user();
+            $user = User::where('cnic', $user->cnic)->with('role')->first();
+            $data= TransformerTrait::transformLoginResponse($user);
+            $data['Bearer'] =   $request->user()->createToken('token')->plainTextToken;
+            return TransformerTrait::successResponse($data,"Logged In Successfully");          
+
+            // if ($user->roleid == 3) {
+
+            //     $users = User::where('cnic', $user->cnic)->first();
+            //     $tk =   $request->user()->createToken('token')->plainTextToken;
+            //     return response()->json([
+            //         "success" => true,
+            //         "data" => $users,
+            //         "Bearer" => $tk
+            //     ]);
+            // } else if ($user->roleid == 4) {
+            //     $user = User::where('cnic', $user->cnic)
+            //         ->join('gatekeepers', 'gatekeepers.gatekeeperid', '=', 'users.id')->first();
+            //     $tk =   $request->user()->createToken('token')->plainTextToken;
+            //     return response()->json([
+            //         "success" => true,
+            //         "data" => $user,
+            //         "Bearer" => $tk
+            //     ]);
+            // } else if ($user->roleid == 2) {
+            //     $user = User::where('cnic', $user->cnic)
+            //         ->join('subadmins', 'subadmins.subadminid', '=', 'users.id')->first();
+            //     $tk =   $request->user()->createToken('token')->plainTextToken;
+            //     return response()->json([
+            //         "success" => true,
+            //         "data" => $user,
+            //         "Bearer" => $tk
+            //     ]);
+            // } else if ($user->roleid == 5) {
+            //     $user = User::where('cnic', $user->cnic)
+            //         ->join('familymembers', 'familymembers.familymemberid', '=', 'users.id')->select(
+            //             'users.*',
+            //             "familymembers.residentid",
+            //             "familymembers.subadminid",
 
 
-            if ($user->roleid == 3) {
+            //         )->first();
 
-                $users = User::where('cnic', $user->cnic)->first();
-                $tk =   $request->user()->createToken('token')->plainTextToken;
-                return response()->json([
-                    "success" => true,
-                    "data" => $users,
-                    "Bearer" => $tk
-                ]);
-            } else if ($user->roleid == 4) {
-                $user = User::where('cnic', $user->cnic)
-                    ->join('gatekeepers', 'gatekeepers.gatekeeperid', '=', 'users.id')->first();
-                $tk =   $request->user()->createToken('token')->plainTextToken;
-                return response()->json([
-                    "success" => true,
-                    "data" => $user,
-                    "Bearer" => $tk
-                ]);
-            } else if ($user->roleid == 2) {
-                $user = User::where('cnic', $user->cnic)
-                    ->join('subadmins', 'subadmins.subadminid', '=', 'users.id')->first();
-                $tk =   $request->user()->createToken('token')->plainTextToken;
-                return response()->json([
-                    "success" => true,
-                    "data" => $user,
-                    "Bearer" => $tk
-                ]);
-            } else if ($user->roleid == 5) {
-                $user = User::where('cnic', $user->cnic)
-                    ->join('familymembers', 'familymembers.familymemberid', '=', 'users.id')->select(
-                        'users.*',
-                        "familymembers.residentid",
-                        "familymembers.subadminid",
+            //     $tk =   $request->user()->createToken('token')->plainTextToken;
+            //     return response()->json([
+            //         "success" => true,
+            //         "data" => $user,
+            //         "Bearer" => $tk
+            //     ]);
+            // } else if ($user->roleid == 6) {
+            //     // $user = User::where('cnic', $user->cnic) ->join('financemanagers', 'financemanagers.financemanagerid', '=' , 'users.id')
+            //     // ->with("subadmin")->with("society")->with("superadmin")->first();
+            //     $user = User::where('cnic', $user->cnic)
+            //     ->join('financemanagers', 'financemanagers.financemanagerid', '=', 'users.id')
+            //     ->first();
 
+            //     $tk =   $request->user()->createToken('token')->plainTextToken;
+            //     return response()->json([
+            //         "success" => true,
+            //         "data" => $user,
+            //         "Bearer" => $tk
+            //     ]);
+            // } else if ($user->roleid == 7) {
 
-                    )->first();
+            //     $user = User::where('cnic', $user->cnic)->join('superadminfinancemanagers', 'superadminfinancemanagers.financemanagerid', '=', 'users.id')->first();
 
-                $tk =   $request->user()->createToken('token')->plainTextToken;
-                return response()->json([
-                    "success" => true,
-                    "data" => $user,
-                    "Bearer" => $tk
-                ]);
-            } else if ($user->roleid == 6) {
-                // $user = User::where('cnic', $user->cnic) ->join('financemanagers', 'financemanagers.financemanagerid', '=' , 'users.id')
-                // ->with("subadmin")->with("society")->with("superadmin")->first();
-                $user = User::where('cnic', $user->cnic)->join('financemanagers', 'financemanagers.financemanagerid', '=', 'users.id')->first();
-
-                $tk =   $request->user()->createToken('token')->plainTextToken;
-                return response()->json([
-                    "success" => true,
-                    "data" => $user,
-                    "Bearer" => $tk
-                ]);
-            } else if ($user->roleid == 7) {
-
-                $user = User::where('cnic', $user->cnic)->join('superadminfinancemanagers', 'superadminfinancemanagers.financemanagerid', '=', 'users.id')->first();
-
-                $tk =   $request->user()->createToken('token')->plainTextToken;
-                return response()->json([
-                    "success" => true,
-                    "data" => $user,
-                    "Bearer" => $tk
-                ]);
-            } else {
-                $tk =   $request->user()->createToken('token')->plainTextToken;
-                return response()->json([
-                    "success" => true,
-                    "data" => $user,
-                    "Bearer" => $tk
-                ]);
-            }
-        } else if (!Auth::attempt(['cnic' => $request->cnic, 'password' => $request->password])) {
-            return response()->json([
-                "success" => false,
-                "data" => "Unauthorized"
-            ], 401);
+            //     $tk =   $request->user()->createToken('token')->plainTextToken;
+            //     return response()->json([
+            //         "success" => true,
+            //         "data" => $user,
+            //         "Bearer" => $tk
+            //     ]);
+            // } else {
+            //     $tk =   $request->user()->createToken('token')->plainTextToken;
+            //     return response()->json([
+            //         "success" => true,
+            //         "data" => $user,
+            //         "Bearer" => $tk
+            //     ]);
+            // }
+        } else {
+            return TransformerTrait::errorResponse($isValidate->errors()->all(),"Unauthorized",401);
         }
     }
 

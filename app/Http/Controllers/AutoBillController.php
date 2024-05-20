@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CustomHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Resident;
+use App\Traits\TransformerTrait;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\AutoBill;
 
 class AutoBillController extends Controller
 {
+    use TransformerTrait;
     /**
      * Display a listing of the resource.
      */
@@ -27,52 +32,28 @@ class AutoBillController extends Controller
             'subadmin_id' => 'required|exists:users,id',
             'financemanager_id' => 'required|exists:financemanagers,financemanagerid',
             'start_date' => 'required|date',
-            'due_date' => 'required|date|after:start_date | before:end_date',
-            'end_date' => 'required|date|after:billstartdate',
-            // 'start_month' => 'nullable',
-            // 'end_month' => 'nullable',
+            'due_date' => 'required|date|after:start_date|before:end_date',
+            'end_date' => 'required|date|after:due_date',
         ]);
         if ($isValidate->fails()) {
-            return response()->json([
-                "errors" => $isValidate->errors()->all(),
-                "success" => false
-            ], 403);
+        return TransformerTrait::errorResponse($isValidate->errors()->all(),null,403);
         }
-        $auto_bill=AutoBill::create($request->all());        
+        $previous_bill= AutoBill::where('start_date',$request->start_date)
+        ->where('end_date',$request->end_date)->first();
+        if(!empty($previous_bill)){
+        return TransformerTrait::errorResponse(['A bill with these start and end date already exists.'],'A bill with these start and end date already exists.',403);
+        }
+        $auto_bill=AutoBill::create($request->all());  
+        $residents = Resident::where('subadminid', $request->subadmin_id)
+                ->where('status', 1)
+                ->where('propertytype', 'house')
+                ->with('user')
+                ->get();
+        CustomHelper::generateBill($residents,$auto_bill->subadmin_id,$auto_bill->financemanager_id,$request->start_date,$request->end_date,$request->due_date);      
         if($auto_bill){
-            return response()->json([
-                "message" => 'Auto Bill Generated Successfully',
-                "success" => true
-            ], 200); 
+          return  TransformerTrait::successResponse($auto_bill,'Auto Bill Generated Successfully');
         }
-        return response()->json([
-            "message" => 'something went wrong',
-            "success" => false
-        ], 500); 
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
+        return TransformerTrait::errorResponse();
     }
 
     /**

@@ -100,9 +100,9 @@ class BillController extends Controller
 
 
 
-            foreach ($property as $property) {
-                $propertyid = $property->id;
-            }
+            // foreach ($property as $property) {
+            // }
+            $propertyid = $property->id;
 
 
 
@@ -718,7 +718,7 @@ class BillController extends Controller
 
             'subadminid' => 'required|exists:users,id',
             'financemanagerid' => 'required|exists:financemanagers,financemanagerid',
-            'duedate' => 'required|date|after:billenddate',
+            'duedate' => 'required|date|after:billstartdate',
             'billstartdate' => 'required|date',
             'billenddate' => 'required|date|after:billstartdate',
             'status' => 'required|in:paid,unpaid,partiallypaid',
@@ -730,10 +730,6 @@ class BillController extends Controller
             'measurementid' => 'required',
             'propertyid' => 'required',
             'residentid' => 'required',
-
-
-
-
         ]);
 
         //  dd($request->charges, $request->latecharges, $request->subadminid, $request->financemanagerid, $request->residentid, $request->propertyid, $request->measurementid, $request->duedate, $request->billstartdate, $request->billenddate, $request->specific_type, $request->description);
@@ -744,10 +740,6 @@ class BillController extends Controller
                 "success" => false
             ], 403);
         }
-
-
-
-
         $getmonth = Carbon::parse($request->billstartdate)->format('F Y');
         $month = $getmonth;
         $payableAmount = $request->charges + $request->tax;
@@ -880,7 +872,6 @@ class BillController extends Controller
 
 
         $isValidate = Validator::make($request->all(), [
-
             'id' => 'required|exists:bills,id',
             'paymenttype' => 'required',
             'totalpaidamount' => 'required',
@@ -936,6 +927,7 @@ class BillController extends Controller
         $bill->totalpaidamount = $bill->totalpaidamount + $paidAmount;
         $bill->status = $billPaidStatus;
         $bill->paymenttype = $paymentType;
+        $bill->paid_on =Carbon::now()->format('Y-m-d');
         $bill->update();
 
 

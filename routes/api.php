@@ -1,6 +1,9 @@
-+<?php
+<?php
 
 use App\Http\Controllers\BlockedUserController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\IndividualBillController;
+use App\Http\Controllers\RevenueAndSalesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SubAdminController;
@@ -34,7 +37,7 @@ use App\Http\Controllers\EmergencyController;
 use App\Http\Controllers\FinanceManagerController;
 use App\Http\Controllers\AutoBillController;
 
-
+require __DIR__.'/financemanage.php';
 
 
 
@@ -290,8 +293,7 @@ use App\Http\Controllers\AutoBillController;
   Route::post('checkblockuser', [BlockedUserController::class, 'checkblockuser']);
 
 
-  //Auto bills
-  Route::resource('auto-bills', AutoBillController::class);
+
 
   //INDIVIDUAL BILL
 
@@ -313,7 +315,24 @@ use App\Http\Controllers\AutoBillController;
   // Route::get('super-finance-manager/currentMonthBills/{residentid}', [SuperAdminFinanceManagerController::class, 'currentMonthBills']);
 
 
+  //Auto bills
+  Route::resource('auto-bills', AutoBillController::class);
 
+  //Resident
+  Route::resource('resident',ResidentController::class);
+
+  //Expense
+  Route::resource('individual-bills',IndividualBillController::class);
+
+  //Expense
+  Route::resource('expense',ExpenseController::class);
+
+  //Expense
+  Route::resource('role',RoleController::class);
+
+  //Expense
+  Route::resource('sales',RevenueAndSalesController::class);
+  Route::get('profit-loss-report',[RevenueAndSalesController::class, 'ProfityLossReport']);
 // });
 
 
@@ -333,3 +352,5 @@ Route::get('clear-cache', function () {
 });
 // for Resident and Family Member
 Route::post('login/mobilenumber', [RoleController::class, 'loginWithMobileNumber']);
+
+

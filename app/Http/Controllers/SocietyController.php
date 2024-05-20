@@ -4,38 +4,36 @@ namespace App\Http\Controllers;
 
 use App\Models\Society;
 
+use App\Traits\TransformerTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class SocietyController extends Controller
 {
 
-    public function addsociety(Request $request)
-
+    public function index(Request $request)
     {
-
+        $societies = Society::whereHas('subadmin.user')
+        ->whereHas('financemanager.user')
+        ->with(['subadmin.user','financemanager.user'])
+        ->get();
+        $data=TransformerTrait::transforSocieties($societies);
+        return TransformerTrait::successResponse($data);
+    }
+    public function addsociety(Request $request)
+    {
         $isValidate = Validator::make($request->all(), [
 
             'country' => 'required',
-
             'state' => 'required',
-
-
             'city' => 'required',
             'area' => 'required',
-
             'type' => 'required',
-
-
             'name' => 'required',
             'address' => 'required',
             'superadminid' => 'required|exists:users,id',
             'structuretype' => 'required'
-
-
-
         ]);
-
 
         if ($isValidate->fails()) {
             return response()->json([
@@ -44,61 +42,29 @@ class SocietyController extends Controller
 
             ], 403);
         }
-
-
-        $society = new Society();
-
+       $society = new Society();
         $society->country = $request->country;
-
         $society->state = $request->state;
-
-
         $society->city = $request->city;
         $society->area = $request->area;
-
         $society->type = $request->type;
-
-
-
         $society->name = $request->name;
-
-
         $society->address = $request->address;
         $society->superadminid = $request->superadminid;
         $society->structuretype = $request->structuretype;
         $society->save();
-
 
         return response()->json(["data" => $society]);
     }
 
 
     public  function updatesociety(Request $request)
-
-
     {
         $isValidate = Validator::make($request->all(), [
-
-            // 'country' => 'required',
-
-            // 'state' => 'required',
-
-
-            // 'city' => 'required',
-            // 'area' => 'required',
-
-            // 'type' => 'required',
-
-
             'name' => 'required',
-
             'address' => 'required',
-            // 'id' => 'required|exists:societies,id',
             'id' => 'required',
-
-
         ]);
-
 
         if ($isValidate->fails()) {
             return response()->json([
@@ -107,32 +73,12 @@ class SocietyController extends Controller
 
             ], 403);
         }
-
-
         $society = Society::find($request->id);
-
-        // $society->country = $request->country;
-
-        // $society->state = $request->state;
-
-
-
-        // $society->city = $request->city;
-        // $society->area = $request->area;
-
-        // $society->type = $request->type;
-
-
-
         $society->name = $request->name;
-
         $society->address = $request->address;
         $society->update();
-
-
         return response()->json([
             "success" => true,
-
             "message" => "update successfully"
         ]);
     }

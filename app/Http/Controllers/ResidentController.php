@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subadmin;
+use App\Traits\TransformerTrait;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Resident;
@@ -19,7 +20,12 @@ use Illuminate\Support\Facades\File;
 
 class ResidentController extends Controller
 {
-
+    use TransformerTrait;
+    public function index()
+    {
+        $residents = Resident::where('status',1)->with('residentHouseAddress.property')->get();
+        return TransformerTrait::successResponse($residents);
+    }
     public function checkChatVisibility(Request $request)
     {
 
@@ -30,11 +36,7 @@ class ResidentController extends Controller
 
 
         if ($isValidate->fails()) {
-            return response()->json([
-                "errors" => $isValidate->errors()->all(),
-                "success" => false
-
-            ], 403);
+            return TransformerTrait::errorResponse($isValidate->errors()->all(),null,403);
         }
 
         $chatVisibilty = Resident::where('residentid', $request->residentid)->first();

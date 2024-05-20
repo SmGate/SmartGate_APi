@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 
+use App\Helpers\CustomHelper;
 use App\Models\Bill;
 use App\Models\Financemanager;
 use App\Models\User;
+use App\Traits\TransformerTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -213,28 +215,42 @@ class FinanceManagerController extends Controller
 
 
 
-    public function currentMonthBills($subadminid, $financemanagerid)
+    public function currentMonthBills(Request $request, $subadminid, $financemanagerid)
     {
         $currentDate = date('Y-m-d');
         $currentYear = date('Y', strtotime($currentDate));
         $currentMonth = date('m', strtotime($currentDate));
         $bills = Bill::where('subadminid', $subadminid)->where("financemanagerid", $financemanagerid)
             // ->whereMonth('billenddate', $currentMonth)
-            ->whereYear(
-                'billenddate',
-                $currentYear
-            )->with(['resident','user','measurement'])
-            ->get()
+            ->when($request->is_previous, function($query){
+                $query->whereDate('billenddate', '<', now());
+            })
+            ->when($request->type, function($query) use ($request){
+                $query->whereDate('description', $request->type);
+            })
+            ->when($request->status, function($query) use ($request){
+                $query->whereDate('status', $request->status);
+            })
+            ->when($request->month, function($query) use ($request){
+                $query->whereMonth('billstartdate', $request->month);
+            })
+            ->when($request->year, function($query) use ($request){
+                $query->whereYear('billstartdate', $request->year);
+            })
+            ->when(!$request->year, function($query) use ($currentYear) {
+                $query->whereYear('billstartdate', $currentYear);
+            })
+            ->with(['resident','user','measurement','subAdmin','financeManager','property'])
+            ->latest()->get()
             ->map(function ($bill) {
                 $billenddate = \Carbon\Carbon::parse($bill->billenddate);
                 // Add the is_previous key based on whether billenddate is in the past
-                $bill->is_previous = $billenddate->isPast() ? true : false;
+                $bill->is_previous = $billenddate->isPast() ? "Previous" : "Current";
                 return $bill;
             });
-        return response()->json([
-            "success" => true,
-            "data" => $bills,
-        ]);
+        $data=TransformerTrait::tranformBills($bills);
+        return TransformerTrait::successResponse($data);
+
     }
 
 

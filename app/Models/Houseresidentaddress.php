@@ -20,18 +20,20 @@ class Houseresidentaddress extends Model
         "sid",
         "propertyid",
         "measurementid"
-
-      
     ];
 
     public function property()
     {
-        return $this->hasMany('App\Models\Property',"id",'propertyid');
+        return $this->hasOne(Property::class,"id",'propertyid');
     }
     
     public function measurement()
     {
         return $this->hasMany('App\Models\Measurement',"id",'measurementid');
+    }
+    public function society()
+    {
+        return $this->belongsTo(Society::class,"societyid",'id');
     }
     
 

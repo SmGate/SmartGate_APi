@@ -9,7 +9,6 @@ class Gatekeeper extends Model
         "gatekeeperid",
         "subadminid",
         "societyid",
-        
-         "gateno",
+        "gateno",
     ];
 }

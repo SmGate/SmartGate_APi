@@ -9,7 +9,6 @@ class Bill extends Model
 {
     use HasFactory;
 
-
     protected $fillable = [
         "charges",
         "latecharges",
@@ -40,24 +39,33 @@ class Bill extends Model
 
     public function user()
     {
-        return $this->hasMany('App\Models\User', "id", 'residentid');
+        return $this->hasOne(User::class, "id", 'residentid');
     }
 
 
     public function property()
     {
-        return $this->hasMany('App\Models\Property', "id", 'propertyid');
+        return $this->hasOne(Property::class, "id", 'propertyid');
     }
 
     public function measurement()
     {
-        return $this->hasMany('App\Models\Measurement', "id", 'measurementid');
+        return $this->hasOne(Measurement::class, "id", 'measurementid');
     }
 
     public function resident()
     {
-        return $this->hasMany('App\Models\Resident', 'residentid', 'residentid');
+        return $this->belongsTo(Resident::class, 'residentid', 'residentid');
     }
+    public function subAdmin()
+    {
+        return $this->belongsTo(Subadmin::class, 'subadminid', 'subadminid');
+    }
+    public function financeManager()
+    {
+        return $this->belongsTo(Financemanager::class, 'financemanagerid', 'financemanagerid');
+    }
+    
 
 
     public function societybuildingapartments()

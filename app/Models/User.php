@@ -27,7 +27,6 @@ class User extends Authenticatable
 
 
     protected $fillable = [
-
         'firstname',
         'lastname',
         'cnic',
@@ -56,43 +55,41 @@ class User extends Authenticatable
      * @var array<string, string>
      */
 
+     public function role()
+     {
+        return $this->hasOne(Role::class,'id','roleid');
+     }
      public function familymember()
      {
- 
- 
          return $this->hasMany('App\Models\Familymember',"id",'familymemberid');
      }
+     public function gateKeeper()
+     {
+        return $this->hasOne(Gatekeeper::class,"gatekeeperid",'id');
+     }
+
 
      public function resident()
      {
- 
- 
-         return $this->hasMany('App\Models\Resident',"residentid",'residentid');
+         return $this->hasOne(Resident::class,"residentid",'id');
      }
 
 
     
      public function subadmin()
      {
- 
- 
          return $this->hasOne('App\Models\User',"id",'subadminid');
      }
-
+     public function financeManager()
+     {
+         return $this->hasOne(Financemanager::class,"financemanagerid",'id');
+     }
      public function superadmin()
      {
- 
- 
          return $this->hasOne('App\Models\User',"id",'superadminid');
      }
-
-
-
-
      public function society()
      {
- 
- 
          return $this->hasOne('App\Models\Society',"id",'societyid');
      }
 

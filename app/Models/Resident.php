@@ -13,8 +13,6 @@ class Resident extends Model
 
 protected $primarykey='residentid';
 protected $table = 'residents';
-
-
     protected $fillable = [
         "residentid",
         "subadminid",
@@ -38,10 +36,9 @@ protected $table = 'residents';
     {
         return $this->hasOne(User::class,'id','residentid');
     }
-
-    public function society()
+    public function residentHouseAddress()
     {
-        return $this->hasMany('App\Models\Society',"id",'societyid');
+        return $this->hasOne(Houseresidentaddress::class,'residentid','residentid');
     }
 
     public function phase()
@@ -59,10 +56,7 @@ protected $table = 'residents';
         return $this->hasMany('App\Models\Street',"id",'sid');
     }
     
-    public function property()
-    {
-        return $this->hasMany('App\Models\Property',"id",'propertyid');
-    }
+    
     
 
     // public function societybuildingapartments()

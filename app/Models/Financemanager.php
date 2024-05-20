@@ -10,12 +10,18 @@ class Financemanager extends Model
     use HasFactory;
 
     protected $fillable = [
-        
         "subadminid",
         "societyid",
         "superadminid",
         "financemanagerid",
         "status"
-        
         ];
+    public function society()
+    {
+        return $this->hasOne(Society::class,"id",'societyid');
+    }
+    public function user()
+    {
+        return $this->hasOne(User::class,"id",'financemanagerid');
+    }
 }

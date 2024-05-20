@@ -25,6 +25,14 @@ class Subadmin extends Model
         // 'password',
         'remember_token',
     ];
+    public function society()
+    {
+        return $this->hasOne(Society::class,"id",'societyid');
+    }
+    public function user()
+    {
+        return $this->hasOne(User::class,"id",'subadminid');
+    }
 
     
 

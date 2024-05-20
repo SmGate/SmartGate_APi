@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bill;
+use App\Traits\TransformerTrait;
 use Illuminate\Http\Request;
 use App\Models\Individualbill;
 use App\Models\Individualbillitem;
@@ -10,6 +12,14 @@ use Illuminate\Support\Facades\Validator;
 
 class IndividualBillController extends Controller
 {
+
+    public function index()
+    {
+        $individual_bills = Bill::where('specific_type','Solo')
+        ->with('user','subAdmin','financeManager')->get();
+        $data=TransformerTrait::tranformBills($individual_bills);
+        return TransformerTrait::successResponse($data,"Individual Bills retrieved successfully");
+    }
     public function createIndividualBill(Request $request)
     {
         $isValidate = Validator::make($request->all(), [
@@ -486,5 +496,28 @@ class IndividualBillController extends Controller
                 'individualBills' => $bills
             ]);
         }
+    }
+    public function update(Request $request, $id)
+    {
+        $isValidate = Validator::make($request->all(), [
+            'charges' => 'required',
+        ]);
+        if ($isValidate->fails()) {
+            return response()->json([
+                "errors" => $isValidate->errors()->all(),
+                "success" => false
+            ], 403);
+        }
+        $individual_bill = Individualbill::find($id);
+        if(empty($individual_bill)){
+            return TransformerTrait::errorResponse(['No matching record found'],null,403);
+        }
+        $individual_bill->charges = $request->charges;
+        $individual_bill->tax = $request->tax ?? $individual_bill->tax;
+        $individual_bill->totalpaidamount = $request->totalpaidamount ?? $individual_bill->totalpaidamount;
+        $individual_bill->payableamount =  $individual_bill->tax + $request->charges;
+        $individual_bill->balance = $individual_bill->payableamount;
+        $individual_bill->save();
+        return TransformerTrait::successResponse($individual_bill);
     }
 }

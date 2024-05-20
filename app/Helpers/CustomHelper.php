@@ -1,6 +1,10 @@
 <?php
 
 namespace App\Helpers;
+use App\Models\Bill;
+use App\Models\Familymember;
+use App\Models\Houseresidentaddress;
+use Carbon\Carbon;
 
 class CustomHelper
 {
@@ -38,6 +42,94 @@ class CustomHelper
         $result = curl_exec($ch);
         // var_dump($result);
         curl_close($ch);
+    }
+    public static function generateBill($residents,$subadmin_id,$financemanager_id,$start_date,$end_date,$due_date){
+        $previousPayableAmount = 0.0;
+        $payableamount=0.0;
+        $fcm = [];
+        foreach ($residents as $resident) {
+            $totalPaidAmount=0.0;
+            $billType='house';
+            $previous_late_charges=0.0;
+            $previousBalance = 0.0;
+            $totalPaidAmount = 0.0;
+            $resident_address = Houseresidentaddress::where('houseresidentaddresses.residentid', $resident->residentid)
+                ->join('residents', 'houseresidentaddresses.residentid', '=', 'residents.residentid')
+                ->with(['property', 'measurement'])
+                ->first();
+            array_push($fcm, $resident->user->fcmtoken);
+            $noOfusers = Familymember::where('subadminid', $subadmin_id)->where('residentid', $resident_address->residentid)->count();
+            //added 1 because the resident it self also
+            $noOfAppUsers = $noOfusers + 1;
+            $month = Carbon::parse($start_date)->format('F Y');
+            // $month = $getmonth;
+            foreach ($resident_address->measurement as $measurement) {
+                $measurementid = $measurement->id;
+                $charges = $measurement->charges;
+                $appcharge = $measurement->appcharges;
+                $tax = $measurement->tax;
+                $payableamount = $appcharge + $tax + $charges;
+                $latecharges = $measurement->latecharges;
+                $balance = $payableamount;
+            }
+            $propertyid = $resident_address->property ? $resident_address->property->id :0;
+            $firstDate = Carbon::parse($start_date);
+            $existingBill = Bill::where('residentid', $resident_address->residentid)
+                ->where('subadminid', $subadmin_id)->where('billtype', $billType)
+                ->whereMonth('billstartdate', $firstDate->month)
+                ->whereYear('billstartdate', $firstDate->year)
+                ->get();
+            foreach ($existingBill as $existingBill) {
+                if ($existingBill != null) {
+                    $firstDate = Carbon::parse($start_date);
+                    $secondDate = Carbon::parse($existingBill->billstartdate);
+                    if ($firstDate->year === $secondDate->year && $firstDate->month === $secondDate->month) {
+                        // return response()->json(['message' => 'the bill of this month is already generated !.']);
+                        return 'Bill Exists';
+                    }
+                }
+            }
+
+            $previousBill = Bill::where('residentid', $resident_address->residentid)->where('subadminid', $subadmin_id)
+                ->whereIn('status', ['unpaid'])->whereIn('isbilllate', [0,1])->GET();
+            if (!empty($previousBill[0]->id)) {
+                foreach ($previousBill as $previousBill) {
+                    $previousPayableAmount = $previousBill->payableamount;
+                    $previous_late_charges += $previousBill->latecharges;
+                    $previousBalance = $previousBill->balance;
+                }
+            } else {
+                $previousPayableAmount = 0;
+                $previousBalance = 0;
+            }
+            $bill = new Bill();
+            $bill->charges = $charges;
+            $bill->latecharges = $latecharges;
+            $bill->appcharges = $appcharge;
+            $bill->tax = $tax;
+            $bill->payableamount = $payableamount + $previousPayableAmount + $previous_late_charges;
+            $bill->balance = $balance + $previousBalance + $previous_late_charges;
+            $bill->subadminid = $subadmin_id;
+            $bill->financemanagerid = $financemanager_id;
+            $bill->residentid = $resident_address->residentid;
+            $bill->propertyid = $propertyid;
+            $bill->measurementid = $measurementid;
+            $bill->duedate = $due_date;
+            $bill->billstartdate = $start_date;
+            $bill->billenddate = $end_date;
+            $bill->month = $month;
+            $bill->status = 'unpaid';
+            $bill->noofappusers = $noOfAppUsers;
+            $bill->billtype = $billType;
+            $bill->paymenttype = 'NA';
+            $bill->totalpaidamount = $totalPaidAmount;
+            $bill->specific_type = 'monthly';
+            $bill->description = 'house bill';
+            $bill->save();
+        }
+        $total=$payableamount + $previousPayableAmount;
+        CustomHelper::sendNotification($fcm, $total);
+        return 'Bills generated Successfully';
     }
     
     // Add more helper functions as needed
